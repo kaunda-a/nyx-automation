@@ -14,7 +14,7 @@ const BROWSER_DOWNLOAD_URL = 'https://github.com/itbrowser-net/undetectable-fing
 const DOWNLOAD_FILE_NAME = 'fingerprint_browser_v1.0.7z';
 
 function downloadFile(url, destination) {
-  console.log(\`Downloading browser from \${url}...\`);
+  console.log(`Downloading browser from ${url}...`);
   
   return new Promise((resolve, reject) => {
     const file = fs.createWriteStream(destination);
@@ -32,7 +32,7 @@ function downloadFile(url, destination) {
       if (response.statusCode !== 200) {
         file.close();
         fs.unlinkSync(destination);
-        return reject(new Error(\`Failed to download: \${response.statusCode} \${response.statusMessage}\`));
+        return reject(new Error(`Failed to download: ${response.statusCode} ${response.statusMessage}`));
       }
       
       response.pipe(file);
@@ -70,12 +70,12 @@ function extractArchive(archivePath) {
         console.log('Extraction completed successfully!');
         resolve();
       } else {
-        reject(new Error(\`Extraction failed with exit code \${code}\`));
+        reject(new Error(`Extraction failed with exit code ${code}`));
       }
     });
     
     extractProcess.on('error', (err) => {
-      reject(new Error(\`Failed to start extraction process: \${err.message}\`));
+      reject(new Error(`Failed to start extraction process: ${err.message}`));
     });
   });
 }
