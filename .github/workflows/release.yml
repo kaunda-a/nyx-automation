@@ -50,10 +50,9 @@ jobs:
       - name: Install pnpm
         run: npm install -g pnpm
 
-      - name: Extract fingerprint browser from local zip
+      - name: Download and extract fingerprint browser
         run: |
-          7z x fingerprint_browser_v1.0.7z
-        working-directory: ${{ github.workspace }}
+          node client/scripts/download-browser-gha.js
 
       - name: Install frontend dependencies
         run: pnpm install

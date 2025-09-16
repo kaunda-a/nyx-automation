@@ -17,7 +17,9 @@
     "test:campaign": "node tests/campaign-functionality-test.js",
     "test:integration": "node tests/integration-test.js",
     "test:comprehensive": "node tests/comprehensive-profile-launch-test.js",
-    "init": "node scripts/init-storage.js && node scripts/migrate-directories.js"
+    "init": "node scripts/init-storage.js && node scripts/migrate-directories.js",
+    "download:browser": "node scripts/download-browser.js",
+    "test:browser": "node scripts/test-browser.js"
   },
   "dependencies": {
     "axios": "^1.4.0",
