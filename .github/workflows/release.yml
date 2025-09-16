@@ -40,7 +40,7 @@ jobs:
         with:
           workspaces: './client/src-tauri -> target'
 
-      - name: Sync node version and setup cache
+      - name: Setup node
         uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
