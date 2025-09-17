@@ -54,16 +54,16 @@ The application automatically handles SSL certificates through ITBrowser's built
 - No external certificate stores need to be modified
 
 ### Installing the Application
-1. Clone the repository (includes the browser zip file)
+1. Clone the repository
 2. Run the installer
-3. The application will automatically extract the browser during first run
+3. The application will automatically download and extract the browser during first run if it's not already present
 
-**Note**: The application will NOT function without the fingerprint browser.
+**Note**: The application will NOT function without the fingerprint browser. The browser will be automatically downloaded from GitHub if not found locally.
 
 ## Project Structure
 - `client/` - React frontend application
 - `server/` - Node.js backend server
-- `fingerprint_browser_v1.0.7z` - Browser archive (included in repository)
+- `fingerprint_browser_v1.0.7z` - Browser archive (automatically downloaded from GitHub if not present)
 
 ## Development
 
@@ -109,7 +109,7 @@ The desktop version is packaged as a single executable for Windows, macOS, and L
 
 ## CI/CD
 GitHub Actions are configured to automatically:
-1. Extract the fingerprint browser from the included zip file
+1. Download and extract the fingerprint browser from GitHub
 2. Build and release the desktop application when new tags are pushed
 
 ## License
