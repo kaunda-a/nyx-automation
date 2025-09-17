@@ -80,13 +80,16 @@ function downloadFile(url, dest, retries = 3) {
           if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
             console.log(`Following redirect to: ${response.headers.location}`);
             file.close(() => {
-              currentOperations--;
-              if (retryCount > 1) {
-                setTimeout(() => attemptDownload(retryCount - 1), 1000);
-              } else {
-                reject(new Error(`Too many redirects`));
-              }
+              fs.unlink(dest, () => {}); // Delete the incomplete file
             });
+            currentOperations--;
+            // Actually follow the redirect by making a new request
+            if (retryCount > 1) {
+              console.log('Following redirect...');
+              setTimeout(() => downloadFile(response.headers.location, dest, retryCount - 1).then(resolve).catch(reject), 1000);
+            } else {
+              reject(new Error(`Too many redirects`));
+            }
             return;
           } else {
             file.close(() => {
