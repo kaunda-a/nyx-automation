@@ -30,6 +30,7 @@ To convert the existing Nyx automation web application into a desktop applicatio
 - Updated tag to trigger new workflow
 - Used pnpm/action-setup for cross-platform pnpm installation
 - Fixed ES module compatibility issue with download scripts by renaming to .cjs extension
+- Fixed ES module compatibility issue with build scripts by renaming to .cjs extension
 
 ## Current Plan
 1. [COMPLETED] Add Tauri dependencies to the client project
@@ -50,8 +51,9 @@ To convert the existing Nyx automation web application into a desktop applicatio
 16. [COMPLETED] Update tag to trigger new workflow
 17. [COMPLETED] Use pnpm/action-setup for cross-platform pnpm installation
 18. [COMPLETED] Fix ES module compatibility issue with download scripts
+19. [COMPLETED] Fix ES module compatibility issue with build scripts
 
 ---
 
 ## Summary Metadata
-**Update time**: 2025-09-17T17:30:00.000Z 
+**Update time**: 2025-09-17T18:00:00.000Z 
