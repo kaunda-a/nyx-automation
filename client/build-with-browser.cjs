@@ -10,24 +10,49 @@ const path = require('path');
 const BROWSER_DOWNLOAD_URL = 'https://github.com/itbrowser-net/undetectable-fingerprint-browser/releases/download/v1.0.0/fingerprint_browser_v1.0.7z';
 const BROWSER_ZIP_FILENAME = 'fingerprint_browser_v1.0.7z';
 
+// Limit concurrent file operations to prevent EMFILE errors on Windows
+const MAX_CONCURRENT_OPERATIONS = 5;
+let currentOperations = 0;
+
 function downloadFile(url, dest, retries = 3) {
   return new Promise((resolve, reject) => {
+    // Wait if we're at the concurrency limit
+    if (currentOperations >= MAX_CONCURRENT_OPERATIONS) {
+      setTimeout(() => downloadFile(url, dest, retries).then(resolve).catch(reject), 100);
+      return;
+    }
+    
+    currentOperations++;
+    
     const attemptDownload = (retryCount) => {
       console.log(`Download attempt ${4 - retryCount} of 3...`);
       const file = fs.createWriteStream(dest);
+      
+      // Handle errors on the file stream
+      file.on('error', (err) => {
+        currentOperations--;
+        console.error('File stream error:', err.message);
+        if (retryCount > 1) {
+          console.log('Retrying download...');
+          setTimeout(() => attemptDownload(retryCount - 1), 3000);
+        } else {
+          reject(new Error(`File stream error: ${err.message}`));
+        }
+      });
       
       https.get(url, (response) => {
         if (response.statusCode === 200) {
           response.pipe(file);
           file.on('finish', () => {
             file.close(() => {
+              currentOperations--;
               // Verify the file was downloaded successfully
               fs.stat(dest, (err, stats) => {
                 if (err) {
                   console.error('Error getting file stats:', err.message);
                   if (retryCount > 1) {
                     console.log('Retrying download...');
-                    setTimeout(() => attemptDownload(retryCount - 1), 1000);
+                    setTimeout(() => attemptDownload(retryCount - 1), 3000);
                   } else {
                     reject(new Error('Failed to verify downloaded file'));
                   }
@@ -38,7 +63,7 @@ function downloadFile(url, dest, retries = 3) {
                   console.error('Downloaded file is empty');
                   if (retryCount > 1) {
                     console.log('Retrying download...');
-                    setTimeout(() => attemptDownload(retryCount - 1), 1000);
+                    setTimeout(() => attemptDownload(retryCount - 1), 3000);
                   } else {
                     reject(new Error('Downloaded file is empty'));
                   }
@@ -54,27 +79,50 @@ function downloadFile(url, dest, retries = 3) {
           // Handle redirects
           if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
             console.log(`Following redirect to: ${response.headers.location}`);
-            attemptDownload(retryCount);
+            file.close(() => {
+              currentOperations--;
+              if (retryCount > 1) {
+                setTimeout(() => attemptDownload(retryCount - 1), 1000);
+              } else {
+                reject(new Error(`Too many redirects`));
+              }
+            });
             return;
           } else {
             file.close(() => {
               fs.unlink(dest, () => {}); // Delete the file async
             });
+            currentOperations--;
             if (retryCount > 1) {
               console.log(`Server responded with status code ${response.statusCode}, retrying...`);
-              setTimeout(() => attemptDownload(retryCount - 1), 1000);
+              setTimeout(() => attemptDownload(retryCount - 1), 3000);
             } else {
               reject(new Error(`Server responded with status code ${response.statusCode}`));
             }
           }
         }
+        
+        // Handle errors on the response
+        response.on('error', (err) => {
+          file.close(() => {
+            fs.unlink(dest, () => {}); // Delete the file async
+          });
+          currentOperations--;
+          if (retryCount > 1) {
+            console.log(`Response error: ${err.message}, retrying...`);
+            setTimeout(() => attemptDownload(retryCount - 1), 3000);
+          } else {
+            reject(new Error(`Response error: ${err.message}`));
+          }
+        });
       }).on('error', (err) => {
         file.close(() => {
           fs.unlink(dest, () => {}); // Delete the file async
         });
+        currentOperations--;
         if (retryCount > 1) {
           console.log(`Download error: ${err.message}, retrying...`);
-          setTimeout(() => attemptDownload(retryCount - 1), 1000);
+          setTimeout(() => attemptDownload(retryCount - 1), 3000);
         } else {
           reject(err);
         }
