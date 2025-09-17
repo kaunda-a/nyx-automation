@@ -32,6 +32,17 @@ jobs:
         run: |
           brew install curl unzip p7zip
 
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
 
@@ -39,16 +50,6 @@ jobs:
         uses: swatinem/rust-cache@v2
         with:
           workspaces: './client/src-tauri -> target'
-
-      - name: Setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 'lts/*'
-          cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
-
-      - name: Install pnpm
-        run: npm install -g pnpm
 
       - name: Download and extract fingerprint browser
         run: |
