@@ -28,6 +28,8 @@ To convert the existing Nyx automation web application into a desktop applicatio
 - Triggered GitHub Actions workflow with new tag v1.1.1
 - Fixed GitHub Actions workflow pnpm installation issue
 - Updated tag to trigger new workflow
+- Used pnpm/action-setup for cross-platform pnpm installation
+- Fixed ES module compatibility issue with download scripts by renaming to .cjs extension
 
 ## Current Plan
 1. [COMPLETED] Add Tauri dependencies to the client project
@@ -46,8 +48,10 @@ To convert the existing Nyx automation web application into a desktop applicatio
 14. [COMPLETED] Trigger GitHub Actions workflow with new tag
 15. [COMPLETED] Fix GitHub Actions workflow pnpm installation issue
 16. [COMPLETED] Update tag to trigger new workflow
+17. [COMPLETED] Use pnpm/action-setup for cross-platform pnpm installation
+18. [COMPLETED] Fix ES module compatibility issue with download scripts
 
 ---
 
 ## Summary Metadata
-**Update time**: 2025-09-17T16:30:00.000Z 
+**Update time**: 2025-09-17T17:30:00.000Z 

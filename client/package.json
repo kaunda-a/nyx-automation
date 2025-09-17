@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node build-with-browser.js",
+    "build": "node build-with-browser.cjs",
     "build:check": "tsc -b && vite build",
     "build:pwa": "vite build && npm run preview",
     "tauri": "tauri",
