@@ -10,31 +10,78 @@ const path = require('path');
 const BROWSER_DOWNLOAD_URL = 'https://github.com/itbrowser-net/undetectable-fingerprint-browser/releases/download/v1.0.0/fingerprint_browser_v1.0.7z';
 const BROWSER_ZIP_FILENAME = 'fingerprint_browser_v1.0.7z';
 
-function downloadFile(url, dest) {
+function downloadFile(url, dest, retries = 3) {
   return new Promise((resolve, reject) => {
-    const file = fs.createWriteStream(dest);
-    https.get(url, (response) => {
-      if (response.statusCode === 200) {
-        response.pipe(file);
-        file.on('finish', () => {
-          file.close();
-          console.log('Download completed!');
-          resolve();
-        });
-      } else {
-        // Handle redirects
-        if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-          downloadFile(response.headers.location, dest)
-            .then(resolve)
-            .catch(reject);
+    const attemptDownload = (retryCount) => {
+      console.log(`Download attempt ${4 - retryCount} of 3...`);
+      const file = fs.createWriteStream(dest);
+      
+      https.get(url, (response) => {
+        if (response.statusCode === 200) {
+          response.pipe(file);
+          file.on('finish', () => {
+            file.close(() => {
+              // Verify the file was downloaded successfully
+              fs.stat(dest, (err, stats) => {
+                if (err) {
+                  console.error('Error getting file stats:', err.message);
+                  if (retryCount > 1) {
+                    console.log('Retrying download...');
+                    setTimeout(() => attemptDownload(retryCount - 1), 1000);
+                  } else {
+                    reject(new Error('Failed to verify downloaded file'));
+                  }
+                  return;
+                }
+                
+                if (stats.size === 0) {
+                  console.error('Downloaded file is empty');
+                  if (retryCount > 1) {
+                    console.log('Retrying download...');
+                    setTimeout(() => attemptDownload(retryCount - 1), 1000);
+                  } else {
+                    reject(new Error('Downloaded file is empty'));
+                  }
+                  return;
+                }
+                
+                console.log(`Download completed! File size: ${stats.size} bytes`);
+                resolve();
+              });
+            });
+          });
         } else {
-          reject(new Error(`Server responded with status code ${response.statusCode}`));
+          // Handle redirects
+          if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
+            console.log(`Following redirect to: ${response.headers.location}`);
+            attemptDownload(retryCount);
+            return;
+          } else {
+            file.close(() => {
+              fs.unlink(dest, () => {}); // Delete the file async
+            });
+            if (retryCount > 1) {
+              console.log(`Server responded with status code ${response.statusCode}, retrying...`);
+              setTimeout(() => attemptDownload(retryCount - 1), 1000);
+            } else {
+              reject(new Error(`Server responded with status code ${response.statusCode}`));
+            }
+          }
         }
-      }
-    }).on('error', (err) => {
-      fs.unlink(dest, () => {}); // Delete the file async
-      reject(err);
-    });
+      }).on('error', (err) => {
+        file.close(() => {
+          fs.unlink(dest, () => {}); // Delete the file async
+        });
+        if (retryCount > 1) {
+          console.log(`Download error: ${err.message}, retrying...`);
+          setTimeout(() => attemptDownload(retryCount - 1), 1000);
+        } else {
+          reject(err);
+        }
+      });
+    };
+    
+    attemptDownload(retries);
   });
 }
 
@@ -49,6 +96,8 @@ async function ensureBrowser() {
       // Check if zip file exists locally
       if (fs.existsSync(`./${BROWSER_ZIP_FILENAME}`)) {
         console.log('Extracting browser from local zip file...');
+        // Add a small delay to ensure file is not locked
+        await new Promise(resolve => setTimeout(resolve, 1000));
         execSync('7z x ' + BROWSER_ZIP_FILENAME, { stdio: 'inherit' });
         console.log('Browser extracted successfully!');
       } else {
@@ -56,6 +105,8 @@ async function ensureBrowser() {
         try {
           await downloadFile(BROWSER_DOWNLOAD_URL, `./${BROWSER_ZIP_FILENAME}`);
           console.log('Extracting downloaded browser zip file...');
+          // Add a small delay to ensure file is not locked
+          await new Promise(resolve => setTimeout(resolve, 1000));
           execSync('7z x ' + BROWSER_ZIP_FILENAME, { stdio: 'inherit' });
           console.log('Browser extracted successfully!');
         } catch (downloadError) {

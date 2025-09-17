@@ -2,8 +2,8 @@
 console.log('Registering workflows...');
 
 // Import workflow files to trigger registration
-require('./src/workflows/campaignLaunch');
-require('./src/workflows/enhancedCampaignLaunch');
-require('./src/workflows/batchCampaignLaunch');
+require('./campaignLaunch');
+require('./enhancedCampaignLaunch');
+require('./batchCampaignLaunch');
 
 console.log('Workflows registered successfully');
