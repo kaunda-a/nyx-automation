@@ -18,7 +18,7 @@
     "test:integration": "node tests/integration-test.js",
     "test:comprehensive": "node tests/comprehensive-profile-launch-test.js",
     "init": "node scripts/init-storage.js && node scripts/migrate-directories.js",
-    "download:browser": "node scripts/download-browser.js",
+    "download:browser": "node scripts/download-browser.cjs",
     "test:browser": "node scripts/test-browser.js"
   },
   "dependencies": {

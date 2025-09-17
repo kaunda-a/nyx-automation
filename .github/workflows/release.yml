@@ -53,7 +53,7 @@ jobs:
 
       - name: Download and extract fingerprint browser
         run: |
-          node client/scripts/download-browser-gha.js
+          node client/scripts/download-browser-gha.cjs
 
       - name: Install frontend dependencies
         run: pnpm install
