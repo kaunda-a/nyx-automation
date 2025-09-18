@@ -44,8 +44,8 @@
     "shortDescription": "Nyx Crawler Bot Desktop Application",
     "longDescription": "An advanced website visit automation tool with anti-detection technology.",
     "resources": [
-      "../server/start.js",
-      "../server/app.js"
+      "../../server/start.js",
+      "../../server/app.js"
     ],
     "windows": {
       "certificateThumbprint": null,
