@@ -88,9 +88,17 @@ jobs:
           includeDebug: false
           includeRelease: true
           
-      - name: Check for generated artifacts
+      - name: Debug Tauri build results
         run: |
-          echo "Checking for generated artifacts:"
-          Get-ChildItem -Recurse -Name -Include *.app,*.dmg,*.exe,*.deb,*.AppImage -ErrorAction SilentlyContinue
-          echo "Contents of client/src-tauri/target/release/bundle:"
-          Get-ChildItem client/src-tauri/target/release/bundle/ -ErrorAction SilentlyContinue
+          echo "=== Tauri Build Debug Information ==="
+          echo "Current directory: $(pwd)"
+          echo "Client directory contents:"
+          ls -la client/
+          echo "Tauri src directory contents:"
+          ls -la client/src-tauri/
+          echo "Target directory contents:"
+          ls -la client/src-tauri/target/ 2>/dev/null || echo "Target directory not found"
+          echo "Release directory contents:"
+          ls -la client/src-tauri/target/release/ 2>/dev/null || echo "Release directory not found"
+          echo "Bundle directory contents:"
+          ls -la client/src-tauri/target/release/bundle/ 2>/dev/null || echo "Bundle directory not found"
