@@ -7,6 +7,7 @@
 
 const https = require('https');
 const fs = require('fs');
+const path = require('path');
 const { spawn } = require('child_process');
 
 // GitHub release URL for the fingerprint browser
@@ -80,6 +81,43 @@ function extractArchive(archivePath) {
   });
 }
 
+async function moveBrowserFiles() {
+  console.log('Moving browser files to correct locations...');
+  
+  // Check if we have a version-specific directory
+  const files = fs.readdirSync('.');
+  const versionDir = files.find(file => 
+    fs.statSync(file).isDirectory() && 
+    file.includes('.') // Likely a version number
+  );
+  
+  if (versionDir) {
+    console.log(`Found version directory: ${versionDir}`);
+    const versionPath = path.join('.', versionDir);
+    
+    // Move chrome.exe to root
+    const chromePath = path.join(versionPath, 'chrome.exe');
+    if (fs.existsSync(chromePath)) {
+      fs.renameSync(chromePath, './chrome.exe');
+      console.log('Moved chrome.exe to root directory');
+    }
+    
+    // Move itbrowser_fingerprint.exe to root
+    const fingerprintPath = path.join(versionPath, 'itbrowser_fingerprint.exe');
+    if (fs.existsSync(fingerprintPath)) {
+      fs.renameSync(fingerprintPath, './itbrowser_fingerprint.exe');
+      console.log('Moved itbrowser_fingerprint.exe to root directory');
+    }
+    
+    // Clean up empty version directory
+    fs.rmdirSync(versionPath, { recursive: true });
+  } else {
+    console.log('No version directory found, assuming flat structure');
+  }
+  
+  console.log('Browser files moved successfully!');
+}
+
 async function main() {
   try {
     console.log('🚀 Starting browser download and extraction for GitHub Actions');
@@ -90,6 +128,9 @@ async function main() {
     
     // Extract archive
     await extractArchive(DOWNLOAD_FILE_NAME);
+    
+    // Move browser files to correct locations
+    await moveBrowserFiles();
     
     // Clean up archive file
     fs.unlinkSync(DOWNLOAD_FILE_NAME);

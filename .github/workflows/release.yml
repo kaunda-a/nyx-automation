@@ -55,9 +55,8 @@ jobs:
           echo "Starting browser download..."
           node client/scripts/download-browser-gha.cjs
           echo "Browser download completed. Checking for files:"
-          ls -la chrome.exe || echo "chrome.exe not found"
-          ls -la itbrowser_fingerprint.exe || echo "itbrowser_fingerprint.exe not found"
-          ls -la fingerprint_browser_v1.0.7z || echo "fingerprint_browser_v1.0.7z found"
+          echo "Contents of current directory:"
+          ls
 
       - name: Install frontend dependencies
         run: pnpm install
