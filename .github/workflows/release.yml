@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, windows-latest]
+        platform: [windows-latest]
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout repository
@@ -25,11 +25,6 @@ jobs:
         if: matrix.platform == 'windows-latest'
         run: |
           choco install curl unzip 7zip
-
-      - name: Install dependencies (macos only)
-        if: matrix.platform == 'macos-latest'
-        run: |
-          brew install curl unzip p7zip
 
       - name: Setup node
         uses: actions/setup-node@v4
@@ -91,37 +86,18 @@ jobs:
       - name: Debug Tauri build results
         run: |
           echo "=== Tauri Build Debug Information ==="
-          echo "Current directory: $(pwd)"
+          echo "Current directory contents:"
+          dir
           echo "Client directory contents:"
-          if ($env:RUNNER_OS -eq "Windows") {
-            dir client/
-          } else {
-            ls -la client/
-          }
+          dir client\
           echo "Tauri src directory contents:"
-          if ($env:RUNNER_OS -eq "Windows") {
-            dir client/src-tauri/
-          } else {
-            ls -la client/src-tauri/
-          }
+          dir client\src-tauri\
           echo "Target directory contents:"
-          if ($env:RUNNER_OS -eq "Windows") {
-            dir client/src-tauri/target/ 2>nul
-            if (!$?) { echo "Target directory not found" }
-          } else {
-            ls -la client/src-tauri/target/ 2>/dev/null || echo "Target directory not found"
-          }
+          dir client\src-tauri\target\ 2>nul
+          if (!$?) { echo "Target directory not found" }
           echo "Release directory contents:"
-          if ($env:RUNNER_OS -eq "Windows") {
-            dir client/src-tauri/target/release/ 2>nul
-            if (!$?) { echo "Release directory not found" }
-          } else {
-            ls -la client/src-tauri/target/release/ 2>/dev/null || echo "Release directory not found"
-          }
+          dir client\src-tauri\target\release\ 2>nul
+          if (!$?) { echo "Release directory not found" }
           echo "Bundle directory contents:"
-          if ($env:RUNNER_OS -eq "Windows") {
-            dir client/src-tauri/target/release/bundle/ 2>nul
-            if (!$?) { echo "Bundle directory not found" }
-          } else {
-            ls -la client/src-tauri/target/release/bundle/ 2>/dev/null || echo "Bundle directory not found"
-          }
+          dir client\src-tauri\target\release\bundle\ 2>nul
+          if (!$?) { echo "Bundle directory not found" }
