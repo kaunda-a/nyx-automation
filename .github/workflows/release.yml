@@ -67,7 +67,7 @@ jobs:
           echo "Starting frontend build..."
           pnpm build
           echo "Frontend build completed. Checking dist directory:"
-          ls -la dist/
+          ls dist/
         working-directory: ./client
 
       - name: Install backend dependencies
@@ -91,6 +91,6 @@ jobs:
       - name: Check for generated artifacts
         run: |
           echo "Checking for generated artifacts:"
-          find . -name "*.app" -o -name "*.dmg" -o -name "*.exe" -o -name "*.deb" -o -name "*.AppImage" 2>/dev/null || echo "No artifacts found"
+          find . -name "*.app" -o -name "*.dmg" -o -name "*.exe" -o -name "*.deb" -o -name "*.AppImage" 2>/dev/null || echo "No artifacts found with find command"
           echo "Contents of client/src-tauri/target/release/bundle:"
-          ls -la client/src-tauri/target/release/bundle/ 2>/dev/null || echo "Bundle directory not found"
+          ls client/src-tauri/target/release/bundle/ 2>/dev/null || echo "Bundle directory not found"
