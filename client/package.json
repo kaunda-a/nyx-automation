@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "node build-with-browser.cjs",
+    "build:complete": "node build-complete.cjs",
     "build:check": "tsc -b && vite build",
     "build:pwa": "vite build && npm run preview",
     "tauri": "tauri",
