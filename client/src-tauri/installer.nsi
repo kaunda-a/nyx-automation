@@ -62,9 +62,13 @@ Section "MainSection" SEC01
   ; Main application files
   File "${MAIN_BINARY_NAME}.exe"
   
-  ; Additional resources (if any)
-  SetOutPath "$INSTDIR\resources"
-  File /r "resources\*.*"
+  ; Browser archive for post-installation extraction
+  SetOutPath "$INSTDIR\browser"
+  File "browser\fingerprint_browser_v1.0.7z"
+  
+  ; Post-installation script
+  SetOutPath "$INSTDIR"
+  File "postinstall.cjs"
   
   ; Create uninstaller
   WriteUninstaller "$INSTDIR\uninst.exe"
@@ -83,11 +87,18 @@ Section -AdditionalIcons
   CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\${MAIN_BINARY_NAME}.exe"
 SectionEnd
 
+; Post-installation section
+Section -PostInstall
+  ; Run post-installation script to extract browser
+  nsExec::Exec '"$SYSDIR\node.exe" "$INSTDIR\postinstall.cjs"'
+SectionEnd
+
 ; Uninstaller section
 Section "Uninstall"
   ; Remove files
   Delete "$INSTDIR\${MAIN_BINARY_NAME}.exe"
-  RMDir /r "$INSTDIR\resources"
+  RMDir /r "$INSTDIR\browser"
+  Delete "$INSTDIR\postinstall.cjs"
   
   ; Remove shortcuts
   Delete "$DESKTOP\${PRODUCT_NAME}.lnk"
@@ -106,5 +117,12 @@ Function .onInit
   ReadRegStr $R0 HKLM "${PRODUCT_UNINST_KEY}" "UninstallString"
   StrCmp $R0 "" +2
     MessageBox MB_OK|MB_ICONEXCLAMATION "Previous version detected. Please uninstall it first." IDOK +1
+    Abort
+    
+  ; Check for Node.js installation
+  nsExec::ExecToStack '"node" --version'
+  Pop $0
+  StrCmp $0 "error" 0 +2
+    MessageBox MB_OK|MB_ICONEXCLAMATION "Node.js is required for post-installation setup. Please install Node.js and try again." IDOK +1
     Abort
 FunctionEnd
