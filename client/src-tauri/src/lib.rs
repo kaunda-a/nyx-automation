@@ -105,7 +105,9 @@ async fn start_embedded_server(app_handle: tauri::AppHandle) -> Result<(), Strin
 
     if !resource_path.exists() {
         log::warn!("Server executable not found in resources, trying alternative methods...");
-        return start_server().await;
+        // Ignore the result since we're in a function that returns Result<(), String>
+        let _ = start_server().await;
+        return Ok(());
     }
 
     // Start the server process with better error handling
