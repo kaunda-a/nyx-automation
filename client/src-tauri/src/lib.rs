@@ -2,6 +2,7 @@ use std::process::{Command, Stdio};
 use std::path::PathBuf;
 use tauri::Manager;
 use log;
+use std::fs;
 
 #[tauri::command]
 async fn check_server_health() -> Result<bool, String> {
@@ -93,8 +94,97 @@ async fn open_server_folder() -> Result<(), String> {
 }
 
 #[tauri::command]
+async fn ensure_browser_files(app_handle: tauri::AppHandle) -> Result<(), String> {
+    log::info!("Ensuring browser files are in correct location...");
+    
+    // Get the resource directory where bundled files are located
+    let resource_dir = app_handle
+        .path()
+        .resource_dir()
+        .map_err(|e| format!("Failed to get resource directory: {}", e))?;
+    
+    // Check if browser directory exists in resources
+    let browser_resource_path = resource_dir.join("browser");
+    if browser_resource_path.exists() {
+        log::info!("Browser files found in resources, copying to application directory...");
+        
+        // Copy browser files to the application directory
+        let app_dir = app_handle
+            .path()
+            .app_local_data_dir()
+            .map_err(|e| format!("Failed to get app data directory: {}", e))?;
+        
+        let target_browser_path = app_dir.join("browser");
+        
+        // Create target directory if it doesn't exist
+        fs::create_dir_all(&target_browser_path)
+            .map_err(|e| format!("Failed to create browser directory: {}", e))?;
+        
+        // Copy browser files using std::fs::copy for individual files
+        copy_dir_all(&browser_resource_path, &target_browser_path)
+            .map_err(|e| format!("Failed to copy browser files: {}", e))?;
+        
+        log::info!("Browser files copied successfully to: {:?}", target_browser_path);
+    } else {
+        log::warn!("Browser files not found in resources, attempting to download...");
+        // Try to download browser if not bundled
+        return download_browser().await;
+    }
+    
+    Ok(())
+}
+
+// Helper function to copy directory recursively
+fn copy_dir_all(src: &PathBuf, dst: &PathBuf) -> std::io::Result<()> {
+    fs::create_dir_all(dst)?;
+    for entry in fs::read_dir(src)? {
+        let entry = entry?;
+        let ty = entry.file_type()?;
+        if ty.is_dir() {
+            copy_dir_all(&entry.path(), &dst.join(entry.file_name()))?;
+        } else {
+            fs::copy(entry.path(), dst.join(entry.file_name()))?;
+        }
+    }
+    Ok(())
+}
+
+#[tauri::command]
+async fn download_browser() -> Result<(), String> {
+    log::info!("Attempting to download browser...");
+    
+    // Try to run the download script
+    match Command::new("node")
+        .arg("./server/scripts/download-browser.cjs")
+        .current_dir("./server")
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()
+    {
+        Ok(mut child) => {
+            // Wait for download to complete
+            match child.wait() {
+                Ok(status) => {
+                    if status.success() {
+                        log::info!("Browser downloaded successfully");
+                        Ok(())
+                    } else {
+                        Err("Browser download failed".to_string())
+                    }
+                }
+                Err(e) => Err(format!("Failed to wait for download process: {}", e)),
+            }
+        }
+        Err(e) => Err(format!("Failed to start browser download: {}", e)),
+    }
+}
+
+#[tauri::command]
 async fn start_embedded_server(app_handle: tauri::AppHandle) -> Result<(), String> {
     log::info!("Starting embedded server...");
+    
+    // Ensure browser files are in the correct location
+    ensure_browser_files(app_handle.clone()).await?;
     
     // Get the resource path for the server executable
     let resource_path = app_handle
@@ -184,6 +274,8 @@ pub fn run() {
             check_server_health,
             start_server,
             open_server_folder,
+            ensure_browser_files,
+            download_browser,
             start_embedded_server,
             wait_for_server_ready
         ])
