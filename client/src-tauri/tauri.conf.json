@@ -1,63 +1,62 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Nyx Crawler Bot",
+  "version": "1.1.0",
+  "identifier": "com.nyxcrawler.bot",
   "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173",
     "beforeDevCommand": "pnpm dev",
-    "beforeBuildCommand": "pnpm build",
-    "devPath": "http://localhost:5173",
-    "distDir": "../dist"
+    "beforeBuildCommand": "pnpm build"
   },
-  "package": {
-    "productName": "Nyx Crawler Bot",
-    "version": "1.1.0"
-  },
-  "tauri": {
-    "allowlist": {
-      "all": false,
-      "shell": {
-        "all": false,
-        "open": true
-      }
-    },
-    "bundle": {
-      "active": true,
-      "targets": "nsis",
-      "identifier": "com.nyxcrawler.bot",
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ],
-      "publisher": "Nyx",
-      "category": "Productivity",
-      "shortDescription": "Nyx Crawler Bot Desktop Application",
-      "longDescription": "An advanced website visit automation tool with anti-detection technology.",
-      "resources": [
-        "../server/start.js",
-        "../server/app.js"
-      ],
-      "windows": {
-        "digestAlgorithm": "sha256",
-        "nsis": {
-          "displayLanguageSelector": false,
-          "installerIcon": "icons/icon.ico",
-          "installMode": "perMachine",
-          "languages": ["English"]
-        }
-      }
-    },
-    "security": {
-      "csp": "default-src 'self' http://localhost:* https://*; img-src 'self' data: https://*; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-    },
+  "app": {
     "windows": [
       {
-        "fullscreen": false,
-        "height": 800,
-        "resizable": true,
         "title": "Nyx Crawler Bot",
-        "width": 1200
+        "width": 1200,
+        "height": 800,
+        "minWidth": 800,
+        "minHeight": 600,
+        "resizable": true,
+        "fullscreen": false,
+        "center": true,
+        "decorations": true,
+        "alwaysOnTop": false,
+        "skipTaskbar": false
       }
-    ]
+    ],
+    "security": {
+      "csp": "default-src 'self'; connect-src 'self' http://localhost:3000 ws://localhost:3001 https://*; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*; font-src 'self' data:;"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "publisher": "Nyx",
+    "category": "Productivity",
+    "shortDescription": "Nyx Crawler Bot Desktop Application",
+    "longDescription": "An advanced website visit automation tool with anti-detection technology.",
+    "resources": [
+      "../server/start.js",
+      "../server/app.js"
+    ],
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": "",
+      "nsis": {
+        "displayLanguageSelector": false,
+        "installerIcon": "icons/icon.ico",
+        "installMode": "perMachine",
+        "languages": ["English"]
+      }
+    }
   }
 }
