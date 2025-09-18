@@ -70,12 +70,6 @@ jobs:
         run: pnpm install
         working-directory: ./server
 
-      - name: Verify build directory
-        run: |
-          echo "Checking build directory contents:"
-          ls -la client/src-tauri/target/release/
-        if: matrix.platform == 'windows-latest' || matrix.platform == 'macos-latest'
-
       - name: Build the app
         uses: tauri-apps/tauri-action@v0
         env:
