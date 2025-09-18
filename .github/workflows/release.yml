@@ -5,74 +5,50 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Version to release (e.g., v1.0.0)'
-        required: true
-        type: string
-
-env:
-  CARGO_TERM_COLOR: always
 
 jobs:
   release:
-    permissions:
-      contents: write
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: 'windows-latest'
-            args: '--target x86_64-pc-windows-msvc'
-
-    runs-on: ${{ matrix.platform }}
+    runs-on: windows-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Rust setup
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Rust cache
-        uses: swatinem/rust-cache@v2
+      - name: Setup node
+        uses: actions/setup-node@v4
         with:
-          workspaces: './client/src-tauri -> target'
+          node-version: 'lts/*'
 
-      - name: Setup pnpm
+      - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9
           run_install: false
 
-      - name: Sync node version and setup cache
-        uses: actions/setup-node@v4
-        with:
-          node-version: 'lts/*'
-          cache: 'pnpm'
-          cache-dependency-path: 'client/pnpm-lock.yaml'
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
 
-      - name: Install frontend dependencies
-        working-directory: ./client
-        run: pnpm install
-
-      - name: Build the app
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Cache Rust
+        uses: swatinem/rust-cache@v2
         with:
-          projectPath: './client'
-          tagName: ${{ github.event.inputs.version || github.ref_name }}
-          releaseName: 'Nyx Crawler Bot ${{ github.event.inputs.version || github.ref_name }}'
-          releaseBody: |
-            ## What's Changed
-            - See the assets below to download and install this version
-            - Auto-update will be available for existing installations
-            
-            ## Installation
-            - **Windows**: Download and run the `.msi` installer
-            
-            ## Security
-            All releases are code-signed and verified.
-          releaseDraft: true
-          prerelease: false
-          args: ${{ matrix.args }}
+          workspaces: './client/src-tauri -> target'
+
+      - name: Install dependencies
+        run: |
+          cd client
+          pnpm install
+
+      - name: Build frontend
+        run: |
+          cd client
+          pnpm build
+
+      - name: Build Tauri app
+        run: |
+          cd client
+          pnpm tauri build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nyx-app-windows
+          path: client/src-tauri/target/release/*.exe
