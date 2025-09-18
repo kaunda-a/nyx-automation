@@ -90,5 +90,3 @@ jobs:
           prerelease: false
           includeDebug: false
           includeRelease: true
-          includeDebug: false
-          includeRelease: true
