@@ -51,4 +51,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: nyx-app-windows
-          path: client/src-tauri/target/release/*.exe
+          path: |
+            client/src-tauri/target/release/**/*.exe
+            client/src-tauri/target/release/**/*.msi
+            client/src-tauri/target/release/**/*.nsis

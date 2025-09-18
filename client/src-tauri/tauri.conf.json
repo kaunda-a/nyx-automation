@@ -33,6 +33,10 @@
       "category": "Productivity",
       "shortDescription": "Nyx Crawler Bot Desktop Application",
       "longDescription": "An advanced website visit automation tool with anti-detection technology.",
+      "resources": [
+        "../server/start.js",
+        "../server/app.js"
+      ],
       "windows": {
         "digestAlgorithm": "sha256",
         "nsis": {
