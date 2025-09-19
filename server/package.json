@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Server for crawler bot",
   "main": "start.js",
+  "bin": "start.js",
   "scripts": {
     "start": "node start.js",
     "dev": "nodemon --ignore localStorage/ start.js",
