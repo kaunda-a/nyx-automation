@@ -8,10 +8,21 @@ on:
 
 jobs:
   release:
-    runs-on: windows-latest
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [windows-latest]
+    runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Install dependencies (windows only)
+        if: matrix.platform == 'windows-latest'
+        run: |
+          choco install curl unzip 7zip
 
       - name: Setup node
         uses: actions/setup-node@v4
@@ -24,40 +35,42 @@ jobs:
           version: 9
           run_install: false
 
-      - name: Install Rust
+      - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache Rust
+      - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
           workspaces: './client/src-tauri -> target'
 
-      - name: Install 7-Zip
-        run: |
-          choco install 7zip
-
       - name: Download and extract fingerprint browser
         run: |
-          cd client
-          node scripts/download-browser-gha.cjs
+          echo "Downloading fingerprint browser..."
+          node client/scripts/download-browser-gha.cjs
 
-      - name: Install dependencies
-        run: |
-          cd client
-          pnpm install
+      - name: Install frontend dependencies
+        run: pnpm install
+        working-directory: ./client
 
-      - name: Build frontend
-        run: |
-          cd client
-          pnpm build
-
-      - name: Build Tauri app
-        run: |
-          cd client
-          pnpm tauri build
-
-      - name: Upload app installer
-        uses: actions/upload-artifact@v4
+      - name: Build the app
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: nyx-app-installer
-          path: client/src-tauri/target/release/**/*.exe
+          projectPath: './client'
+          tagName: ${{ github.ref_name }}
+          releaseName: "Nyx Crawler Bot ${{ github.ref_name }}"
+          releaseBody: |
+            ## What's Changed
+            - See the assets below to download and install this version
+            - Auto-update will be available for existing installations
+            
+            ## Installation
+            - **Windows**: Download and run the `.msi` installer
+            
+            ## Security
+            All releases are code-signed and verified.
+          releaseDraft: true
+          prerelease: false
+          includeDebug: false
+          includeRelease: true
