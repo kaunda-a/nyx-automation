@@ -56,7 +56,7 @@ The application automatically handles SSL certificates through ITBrowser's built
 ### Installing the Application
 1. Clone the repository
 2. Run the installer
-3. The application will automatically download and extract the browser during first run if it's not already present
+3. The application will automatically download and extract the browser during first run
 
 **Note**: The application will NOT function without the fingerprint browser. The browser will be automatically downloaded from GitHub if not found locally.
 
@@ -114,3 +114,7 @@ GitHub Actions are configured to automatically:
 
 ## License
 Proprietary software. All rights reserved.
+
+---
+
+*Last updated: September 17, 2025*
