@@ -32,6 +32,15 @@ jobs:
         with:
           workspaces: './client/src-tauri -> target'
 
+      - name: Install 7-Zip
+        run: |
+          choco install 7zip
+
+      - name: Download and extract fingerprint browser
+        run: |
+          cd client
+          node scripts/download-browser-gha.cjs
+
       - name: Install dependencies
         run: |
           cd client
