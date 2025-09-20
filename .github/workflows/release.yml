@@ -74,3 +74,13 @@ jobs:
           prerelease: false
           includeDebug: false
           includeRelease: true
+          
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nyx-app-installer-${{ matrix.platform }}
+          path: |
+            client/src-tauri/target/release/**/*.exe
+            client/src-tauri/target/release/**/*.msi
+            client/src-tauri/target/release/bundle/**/*.exe
+            client/src-tauri/target/release/bundle/**/*.msi
